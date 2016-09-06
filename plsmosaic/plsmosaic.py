@@ -39,7 +39,9 @@ def command():
         'unfurl_links': false,
         'unfurl_media': false,
         'attachments': [
-            'fallback': 'mosaic',
-            'image_url': image_url
+                {
+                    'fallback': 'mosaic',
+                    'image_url': image_url   
+                }
             ]
         })
