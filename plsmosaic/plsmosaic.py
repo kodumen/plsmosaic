@@ -1,6 +1,8 @@
 from flask import Flask, request, json
 from urllib.parse import urlparse
-from urllib.request import urlopen
+from urllib.request import urlretrieve
+import cloudinary.uploader
+import cloudinary.utils
 
 app = Flask(__name__)
 
@@ -17,11 +19,21 @@ def command():
     if url_info.scheme not in ('http', 'https'):
         return 'Invalid protocol. Allowed: HTTP, HTTPS.'
 
-    image = urlopen(request.form['text'])
-    if not image.info().get_content_type().startswith('image/'):
+    tmp_file, image_info = urlretrieve(request.form['text'])
+    if not image_info.get_content_type().startswith('image/'):
         return 'Invalid content type. Allowed: image/*'
+
+    upload_info = cloudinary.uploader.upload(tmp_file)
+    
+    # Hard coded numbers because I'm too lazy right now. It's 12:28 AM.
+    image_url, image_options = cloudinary.utils.cloudinary_url(
+        upload_info['public_id'],
+        effect = 'pixelate:{}'.format(50 * 3 // 4),
+        width = upload_info['width'] * 3 // 4,
+        height = upload_info['height'] * 3 // 4
+        )
 
     return json.jsonify({
         'response_type': 'in_channel',
-        'text': request.form['text']
+        'text': image_url
         })
