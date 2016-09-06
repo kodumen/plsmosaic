@@ -35,5 +35,11 @@ def command():
 
     return json.jsonify({
         'response_type': 'in_channel',
-        'text': image_url
+        'text': '*{}*:\n<{}|*Original*>'.format(request.form['user_name'], request.form['text']),
+        'unfurl_links': false,
+        'unfurl_media': false,
+        'attachments': [
+            'fallback': 'mosaic',
+            'image_url': image_url
+            ]
         })
