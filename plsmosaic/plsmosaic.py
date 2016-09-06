@@ -28,7 +28,7 @@ def command():
     # Hard coded numbers because I'm too lazy right now. It's 12:28 AM.
     image_url, image_options = cloudinary.utils.cloudinary_url(
         upload_info['public_id'],
-        effect = 'pixelate:{}'.format(50 * 3 // 4),
+        effect = 'pixelate:{}'.format(upload_info['width'] // 50 * 3 // 4),
         width = upload_info['width'] * 3 // 4,
         height = upload_info['height'] * 3 // 4
         )
