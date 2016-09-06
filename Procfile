@@ -1,1 +1,1 @@
-web: gunicorn plsmosaic/plsmosaic.py --log-file -
+web: gunicorn plsmosaic/plsmosaic:app --log-file -
