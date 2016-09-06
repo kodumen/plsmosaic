@@ -2,6 +2,7 @@ from flask import Flask, request, json
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
 import cloudinary.uploader
+import cloudinary.utils
 
 app = Flask(__name__)
 
@@ -23,8 +24,16 @@ def command():
         return 'Invalid content type. Allowed: image/*'
 
     upload_info = cloudinary.uploader.upload(tmp_file)
+    
+    # Hard coded numbers because I'm too lazy right now. It's 12:28 AM.
+    image_url, image_options = cloudinary.utils.cloudinary_url(
+        upload_info['public_id'],
+        effect = 'pixelate:{}'.format(50 * 3 // 4),
+        width = upload_info['width'] * 3 // 4,
+        height = upload_info['height'] * 3 // 4
+        )
 
     return json.jsonify({
         'response_type': 'in_channel',
-        'text': upload_info['secure_url']
+        'text': image_url
         })
