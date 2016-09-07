@@ -83,6 +83,8 @@ def get_params(text):
     """
     Return a dictionary of the parameters and their values.
     Raise an error if url is invalid.
+
+    [url] [size] [scale]
     """
     tokens = text.split(' ')
 
@@ -91,13 +93,13 @@ def get_params(text):
         raise Error('Invalid protocol. Allowed: http, https')
 
     try:
-        scale = float(array_value(tokens, 1))
+        scale = float(array_value(tokens, 2))
         scale = min(1.0, max(scale, 0.0))
     except ValueError:
         scale = 1.0
 
     try:
-        size = int(array_value(tokens, 2))
+        size = int(array_value(tokens, 1))
     except ValueError:
         size = None
 
