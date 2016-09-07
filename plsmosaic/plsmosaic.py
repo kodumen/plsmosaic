@@ -27,17 +27,11 @@ def command():
     except Error as e:
         return str(e)
     
-    # Hard coded numbers because I'm too lazy right now. It's 12:28 AM.
-    image_url, image_options = cloudinary.utils.cloudinary_url(
-        upload_info['public_id'],
-        effect = 'pixelate:{}'.format(upload_info['width'] // 50 * 3 // 4),
-        width = upload_info['width'] * 3 // 4,
-        height = upload_info['height'] * 3 // 4
-        )
+    image_url = get_image_with_mosaic(upload_info, params)
 
     return json.jsonify({
         'response_type': 'in_channel',
-        'text': '*{}*:\n<{}|*Original*>'.format(request.form['user_name'], request.form['text']),
+        'text': '*{}*:\n<{}|*Original*>'.format(request.form['user_name'], params['url']),
         'unfurl_links': False,
         'unfurl_media': False,
         'attachments': [
@@ -47,6 +41,28 @@ def command():
                 }
             ]
         })
+
+def get_image_with_mosaic(image, options):
+    """
+    Apply the mosaic filter to the image.
+    options = {
+        'scale': scale of the image's width and height,
+        'size': 0 to 200, or None for default,
+        }
+    """
+    if options['size'] == None:
+        effect = 'pixelate'
+    else:
+        effect = 'pixelate:{}'.format(options['size'])
+
+    image_url, image_options = cloudinary.utils.cloudinary_url(
+        image['public_id'],
+        effect = effect,
+        width = options['scale'],
+        height = options['scale']
+        )
+
+    return image_url
 
 def retrieve_image(url):
     """
@@ -69,14 +85,27 @@ def get_params(text):
     Raise an error if url is invalid.
     """
     tokens = text.split(' ')
-    url_info = urlparse(array_value(tokens, 0, ''))
 
+    url_info = urlparse(array_value(tokens, 0))
     if url_info.scheme not in ['http', 'https']:
         raise Error('Invalid protocol. Allowed: http, https')
 
+    try:
+        scale = float(array_value(tokens, 1))
+        scale = min(1.0, max(scale, 0.0))
+    except ValueError:
+        scale = 1.0
+
+    try:
+        size = int(array_value(tokens, 2))
+    except ValueError:
+        size = None
+
     return {
-        'url': array_value(tokens, 0, ''),
-        'url_hash': get_hash(url_info.netloc + url_info.path)
+        'url': array_value(tokens, 0),
+        'url_hash': get_hash(url_info.netloc + url_info.path),
+        'scale': scale,
+        'size': size
         }
 
 def get_hash(text):
@@ -87,7 +116,7 @@ def get_hash(text):
     hash.update(bytes(text, 'utf-8'))
     return hash.hexdigest()
 
-def array_value(array, index, default=None):
+def array_value(array, index, default=''):
     """
     Get the value in the array's index or a default value.
     """
@@ -95,7 +124,6 @@ def array_value(array, index, default=None):
         return array[index]
     except IndexError:
         return default
-
 
 class Error(Exception):
     """
