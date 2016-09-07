@@ -10,12 +10,12 @@ app = Flask(__name__)
 
 @app.route('/')
 def version():
-    return 'pls mosaic 0.0.1a';
+    return 'pls mosaic 0.1.1a';
 
 @app.route('/', methods=['POST'])
 def command():
     if request.form['text'] == '':
-        return 'pls mosaic 0.1.0a'
+        return 'pls mosaic 0.1.1a'
 
     try:
         params = get_params(request.form['text'])
